@@ -1,0 +1,14 @@
+<!DOCTYPE html><meta charset="utf-8"><title>Reset SW</title>
+<button id="go">Desregistrar Service Worker</button>
+<pre id="out"></pre>
+<script>
+document.getElementById('go').onclick = async () => {
+  if('serviceWorker' in navigator){
+    const regs = await navigator.serviceWorker.getRegistrations();
+    for(const r of regs){ await r.unregister(); }
+    document.getElementById('out').textContent = 'Listo. Cierra pestaña y abre ?v=fix';
+  } else {
+    document.getElementById('out').textContent = 'Este navegador no usa SW.';
+  }
+};
+</script>
