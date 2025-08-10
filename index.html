@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>NeuroTouch</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>NeuroTouch</h1>
+  <p>Interfaz táctil para entrenamiento motor y cognitivo en neurorehabilitación. Diseñado para iPhone 11 (accesible, alto contraste, botones grandes).</p>
+</header>
+
+<main>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="home" role="tab" aria-selected="true">Inicio</button>
+    <button class="tab" data-tab="simple" role="tab">Simple</button>
+    <button class="tab" data-tab="tapping" role="tab">Tapping 30s</button>
+    <button class="tab" data-tab="rt" role="tab">Tiempo de reacción</button>
+    <button class="tab" data-tab="metronome" role="tab">Metrónomo</button>
+    <button class="tab" data-tab="dualtask" role="tab">Doble tarea</button>
+    <button class="tab" data-tab="ajustes" role="tab">Ajustes</button>
+  </nav>
+
+  <section id="home" class="panel active">
+    <div class="card">
+      <h2>Resumen de sesión</h2>
+      <div class="grid2">
+        <div><strong>Paciente:</strong> <span id="pName">—</span></div>
+        <div><strong>Duración sesión:</strong> <span id="sessDur">—</span></div>
+        <div><strong>Pruebas realizadas:</strong> <span id="sessTasks">0</span></div>
+        <div><strong>Eventos:</strong> <span id="sessEvents">0</span></div>
+      </div>
+      <div class="btn-row">
+        <button id="btnExport" class="btn">Exportar CSV</button>
+        <button id="btnClear" class="btn ghost">Borrar datos</button>
+      </div>
+      <p class="hint">Los datos se guardan localmente y pueden exportarse en CSV para registro clínico.</p>
+    </div>
+
+    <div class="card notice">
+      <p><strong>Nota:</strong> Para usar sensores (acelerómetro) debe abrirse bajo HTTPS y otorgar permiso en iOS.</p>
+    </div>
+  </section>
+
+  <section id="simple" class="panel">
+    <div class="card">
+      <h2>Botón grande con feedback</h2>
+      <p class="hint">Útil como estímulo: feedback visual + sonoro. Mantener para sostener.</p>
+      <div class="center">
+        <button id="bigBtn" class="big-btn" aria-label="Botón grande">TOCAR</button>
+      </div>
+      <div class="status">
+        <div><strong>Toques:</strong> <span id="simpleTaps">0</span></div>
+        <div><strong>Mantenciones:</strong> <span id="simpleHolds">0</span></div>
+      </div>
+      <audio id="beep" preload="auto">
+        <source src="tones/beep.wav" type="audio/wav"/>
+      </audio>
+    </div>
+  </section>
+
+  <section id="tapping" class="panel">
+    <div class="card">
+      <h2>Tapping alterno (30s)</h2>
+      <p class="hint">Toque alternando izquierda/derecha lo más rápido y preciso posible durante 30s.</p>
+      <div class="tap-arena">
+        <button class="target left" data-side="L" aria-label="Objetivo izquierdo">L</button>
+        <button class="target right" data-side="R" aria-label="Objetivo derecho">R</button>
+      </div>
+      <div class="status">
+        <div><strong>Acertados:</strong> <span id="tapHits">0</span></div>
+        <div><strong>Errores:</strong> <span id="tapErr">0</span></div>
+        <div><strong>Secuencia esperada:</strong> <span id="tapExpected">L</span></div>
+        <div><strong>Tiempo:</strong> <span id="tapTime">30.0</span>s</div>
+      </div>
+      <div class="btn-row">
+        <button id="tapStart" class="btn primary">Iniciar 30s</button>
+        <button id="tapStop" class="btn danger" disabled>Detener</button>
+        <button id="tapReset" class="btn ghost">Reiniciar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="rt" class="panel">
+    <div class="card">
+      <h2>Tiempo de reacción</h2>
+      <p class="hint">Espere el estímulo y toque ASAP.</p>
+      <div class="rt-arena" id="rtArena" aria-live="polite">
+        <div id="rtCue" class="rt-cue">PREPÁRESE…</div>
+      </div>
+      <div class="status">
+        <div><strong>Último RT:</strong> <span id="rtLast">—</span> ms</div>
+        <div><strong>Promedio:</strong> <span id="rtAvg">—</span> ms</div>
+        <div><strong>Intentos:</strong> <span id="rtN">0</span></div>
+      </div>
+      <div class="btn-row">
+        <button id="rtGo" class="btn primary">Comenzar</button>
+        <button id="rtReset" class="btn ghost">Reiniciar</button>
+      </div>
+      <audio id="click" preload="auto">
+        <source src="tones/click.wav" type="audio/wav"/>
+      </audio>
+    </div>
+  </section>
+
+  <section id="metronome" class="panel">
+    <div class="card">
+      <h2>Metrónomo / Ritmo</h2>
+      <div class="controls">
+        <label>BPM <input type="range" id="bpm" min="20" max="200" value="60"></label>
+        <span id="bpmVal">60</span>
+      </div>
+      <div class="btn-row">
+        <button id="mStart" class="btn primary">Iniciar</button>
+        <button id="mStop" class="btn danger" disabled>Detener</button>
+      </div>
+      <p class="hint">Útil para cadenciar pasos/movimientos. Incluye clic sonoro y flash visual.</p>
+      <div class="flash" id="flash"></div>
+    </div>
+  </section>
+
+  <section id="dualtask" class="panel">
+    <div class="card">
+      <h2>Doble tarea (visual + decisión)</h2>
+      <p class="hint">Toque solo cuando el estímulo coincida con la regla (p. ej., color ROJO con texto “ROJO”).</p>
+      <div class="rules">
+        <label>Regla:
+          <select id="ruleSel">
+            <option value="congruente">Tocar si color y texto coinciden</option>
+            <option value="incongruente">Tocar si NO coinciden</option>
+            <option value="rojo">Tocar solo si color es ROJO</option>
+          </select>
+        </label>
+        <label>Intervalo (ms) <input type="number" id="stimInterval" min="600" step="100" value="1200"></label>
+        <label>Duración (s) <input type="number" id="dualDur" min="10" step="5" value="60"></label>
+      </div>
+      <div class="duo-arena" id="duoArena" aria-live="polite">
+        <div id="duoStim" class="duo-stim">—</div>
+      </div>
+      <div class="status">
+        <div><strong>Acertados:</strong> <span id="duoHits">0</span></div>
+        <div><strong>Falsos +:</strong> <span id="duoFP">0</span></div>
+        <div><strong>Omisiones:</strong> <span id="duoMiss">0</span></div>
+        <div><strong>Tiempo:</strong> <span id="duoTime">60</span>s</div>
+      </div>
+      <div class="btn-row">
+        <button id="duoStart" class="btn primary">Iniciar</button>
+        <button id="duoStop" class="btn danger" disabled>Detener</button>
+        <button id="duoReset" class="btn ghost">Reiniciar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="ajustes" class="panel">
+    <div class="card">
+      <h2>Ajustes clínicos</h2>
+      <div class="grid2">
+        <label>Nombre paciente <input id="inName" placeholder="Ej: Sra. M.G."></label>
+        <label>Tamaño objetivo <input type="range" id="size" min="1" max="3" step="1" value="2"></label>
+        <label>Alto contraste <input type="checkbox" id="contrast" checked></label>
+        <label>Volumen <input type="range" id="vol" min="0" max="1" step="0.05" value="0.8"></label>
+      </div>
+      <p class="hint">Los ajustes se guardan en el dispositivo.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <button id="installBtn" class="btn install">Instalar como App</button>
+  <span class="footnote">Funciona offline tras instalar.</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
